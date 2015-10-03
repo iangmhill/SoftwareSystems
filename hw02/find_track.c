@@ -47,6 +47,7 @@ void find_track_regex(char pattern[])
             printf("Track %i: '%s'\n", i, tracks[i]);
         }
     }
+    regfree(&regex);
 }
 
 // Truncates the string at the first newline, if there is one.
