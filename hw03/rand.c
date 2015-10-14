@@ -16,6 +16,7 @@
     http://www.gnu.org/licenses/.
 
 */
+#include <inttypes.h>
 
 // generate a random float using the algorithm described
 // at allendowney.com/research/rand
@@ -89,7 +90,7 @@ float my_random_float2()
 // compute a random double using my algorithm
 typedef union box {
   double d;
-  long i;
+  uint64_t i;
 } Box;
 
 int get_bit ()
@@ -107,15 +108,36 @@ int get_bit ()
   return bit;
 }
 
+// Number to binary string converstion function adapted
+// from code at http://c-faq.com/misc/hexio.html
+char * baseconv(uint64_t num, int base)
+{
+  static char retbuf[65];
+  char *p;
+
+  if(base < 2 || base > 16)
+    return NULL;
+
+  p = &retbuf[sizeof(retbuf)-1];
+  *p = '\0';
+
+  do {
+    *--p = "0123456789abcdef"[num % base];
+    num /= base;
+  } while(num != 0);
+
+  return p;
+}
+
 double my_random_double()
 {
-  long mant, exp, high_exp, low_exp;
+  uint64_t mant, exp, high_exp, low_exp;
   Box low, high, ans;
   low.d = 0.0;
   high.d = 1.0;
   /* extract the exponent fields from low and high */
-  low_exp = (low.i >> 52) & 0x0000FF;
-  high_exp = (high.i >> 52) & 0x0000FF;
+  low_exp = (low.i >> 52) & 0x000FFF;
+  high_exp = (high.i >> 52) & 0x000FFF;
   /* choose random bits and decrement exp until a 1 appears.
   the reason for subracting one from high_exp is left
   as an exercise for the reader */
@@ -123,14 +145,16 @@ double my_random_double()
     if (get_bit()) break;
   }
   /* choose a random 52-bit mantissa */
-  mant = random() & 0x7FFFFFFFFFFFFF;
+  uint64_t r1 = random();
+  uint64_t r2 = random();
+  mant = ((r1 & 0x3FFFFFF) << 26) | (r2 & 0x3FFFFFF);
+  mant = mant & 0x7FFFFFFFFFFFFF;
 
   /* if the mantissa is zero, half the time we should move
   to the next exponent range */
   if (mant == 0 && get_bit()) exp++;
   /* combine the exponent and the mantissa */
   ans.i = (exp << 52) | mant;
-  printf("%li", ans.i);
   return ans.d;
 }
 
