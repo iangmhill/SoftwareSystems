@@ -17,6 +17,9 @@ typedef struct {
   int count;
 } CircularBuffer;
 
+/*
+Initialize and allocate memory for a new CircularBuffer
+*/
 CircularBuffer* CircularBuffer_create(int length) {
   CircularBuffer* buffer = malloc(sizeof(CircularBuffer));
   buffer->length = length;
@@ -27,12 +30,18 @@ CircularBuffer* CircularBuffer_create(int length) {
   return buffer;
 }
 
+/*
+Free the memory for an existing CircularBuffer
+*/
 void CircularBuffer_delete(CircularBuffer* buffer) {
   if (buffer == NULL) return;
   free(buffer->buffer);
   free(buffer);
 }
 
+/*
+Add a float value to the CircularBuffer if space is available
+*/
 int CircularBuffer_push(CircularBuffer* buffer, float val) {
   if (buffer->count == buffer->length) {
     if (LOG) printf("PUSH FAILED - BUFFER FULL\n");
@@ -46,6 +55,9 @@ int CircularBuffer_push(CircularBuffer* buffer, float val) {
   }
 }
 
+/*
+Remove a float value from the CircularBuffer unless the buffer is empty
+*/
 int CircularBuffer_pop(CircularBuffer* buffer, float* val) {
   if (buffer->count == 0) {
     if (LOG) printf("POP FAILED - BUFFER EMPTY\n");
@@ -59,10 +71,16 @@ int CircularBuffer_pop(CircularBuffer* buffer, float* val) {
   }
 }
 
+/*
+Increment the value of a CircularBuffer index such that the buffer is circular
+*/
 int CircularBuffer_incr(int val, int length) {
   return (val + 1) % length;
 }
 
+/*
+Print the complete state of a CircularBuffer
+*/
 void CircularBuffer_print(CircularBuffer* buffer) {
   printf("LENGTH: %i COUNT: %i HEAD: %i TAIL: %i\n",
       buffer->length, buffer->count, buffer->head, buffer->tail);
