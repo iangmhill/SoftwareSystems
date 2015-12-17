@@ -41,7 +41,8 @@ int pop(Node **head) {
 
     next_node = (*head)->next;
     retval = (*head)->val;
-    *head = next_node;
+    free(*head);
+    head = &next_node;
 
     return retval;
 }
@@ -120,6 +121,18 @@ int insert_by_index(Node **head, int val, int index) {
     return 0;
 }
 
+void free_list(Node **head) {
+    Node *node = *head;
+    Node *next;
+
+    while (node != NULL) {
+        next = node->next;
+        printf("Freeing node %i\n", node->val);
+        free(node);
+        node = next;
+    }
+}
+
 // Makes a mysterious data structure.
 Node *make_something() {
     Node *node1 = make_node(1, NULL);
@@ -160,8 +173,11 @@ int main() {
     insert_by_index(&empty, 1, 0);
     print_list(empty);
 
+    free_list(&empty);
+    free_list(&test_list);
+
     Node *something = make_something();
-    free(something);
+    free_list(&something);
 
     return 0;
 }
